@@ -1,6 +1,6 @@
 const express = require("express");
-const User = require("./modal/user");
-const connectDB = require("./database/mongoDb");
+const User = require("./src/modal/user");
+const connectDB = require("./src/database/mongoDb");
 const bcrypt = require("bcrypt");
 
 const app = express();
@@ -27,6 +27,21 @@ app.post("/signUp", async (req, res) => {
     res.status(500).send("Signup error: " + err.message);
   }
 });
+
+
+ app.post("/user", async (req, res) => {
+  const user = new User({
+    firstName: "Jatin",
+    lastName: "Saini",
+    email: "jatinrsaini@gmail.com",
+    password: "jatin123",
+  })
+
+  await user.save()
+
+ });
+
+
 
 connectDB()
   .then(() => {
