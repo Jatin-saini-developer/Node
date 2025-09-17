@@ -2,10 +2,12 @@ const express = require("express");
 const User = require("./src/modal/user");
 const connectDB = require("./src/database/mongoDb");
 const bcrypt = require("bcrypt");
-const {validateSignUpData} = require("./src/utils/validation")
+const {validateSignUpData} = require("./src/utils/validation");
+const cookieParser = require("cookie-parser")
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 app.post("/signUp", async (req, res) => {
   try {
@@ -46,7 +48,9 @@ app.post("/login", async(req, res) =>{
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if(isPasswordValid){
+      res.cookie("token", "randomshit")
       res.send("Login Sucessfully");
+
     }else{
       throw new Error("Login Error, Please try again or signUp first");
     }
@@ -55,6 +59,13 @@ app.post("/login", async(req, res) =>{
     res.status(404).send(err.message)
 
   }
+})
+
+app.get("/profile", async(req, res)=>{
+  const cookie = req.cookies
+
+  console.log(cookie);
+  res.send("Your Profile");
 })
 
  app.post("/user", async (req, res) => {
