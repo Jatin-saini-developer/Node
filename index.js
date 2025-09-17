@@ -3,7 +3,8 @@ const User = require("./src/modal/user");
 const connectDB = require("./src/database/mongoDb");
 const bcrypt = require("bcrypt");
 const {validateSignUpData} = require("./src/utils/validation");
-const cookieParser = require("cookie-parser")
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 app.use(express.json());
@@ -48,7 +49,12 @@ app.post("/login", async(req, res) =>{
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if(isPasswordValid){
-      res.cookie("token", "randomshit")
+
+      const token = jwt.sign({_id : user._id}, "DEV@TINDER69")
+
+
+
+      res.cookie("token", token)
       res.send("Login Sucessfully");
 
     }else{
@@ -61,12 +67,32 @@ app.post("/login", async(req, res) =>{
   }
 })
 
-app.get("/profile", async(req, res)=>{
-  const cookie = req.cookies
+app.get("/profile", async (req, res) => {
+  try {
+    const { token } = req.cookies;
 
-  console.log(cookie);
-  res.send("Your Profile");
-})
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    // Verify token
+    const decodedMessage = jwt.verify(token, "DEV@TINDER69");
+    const { _id } = decodedMessage;
+
+    // Await the DB call
+    const user = await User.findById(_id);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(401).json({ error: "Invalid or expired token" });
+  }
+});
+
 
  app.post("/user", async (req, res) => {
   const user = new User({
