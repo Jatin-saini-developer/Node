@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const {validateSignUpData} = require("./src/utils/validation");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
+const {userAuth} = require("./src/middleWares/userAuth")
 
 const app = express();
 app.use(express.json());
@@ -50,7 +51,7 @@ app.post("/login", async(req, res) =>{
 
     if(isPasswordValid){
 
-      const token = jwt.sign({_id : user._id}, "DEV@TINDER69")
+      const token = jwt.sign({_id : user._id}, "DEV@TINDER69",{expiresIn : "1d"})
 
 
 
@@ -67,24 +68,26 @@ app.post("/login", async(req, res) =>{
   }
 })
 
-app.get("/profile", async (req, res) => {
+app.get("/profile", userAuth ,async (req, res) => {
   try {
-    const { token } = req.cookies;
+    // const { token } = req.cookies;
 
-    if (!token) {
-      return res.status(401).json({ error: "No token provided" });
-    }
+    // if (!token) {
+    //   return res.status(401).json({ error: "No token provided" });
+    // }
 
-    // Verify token
-    const decodedMessage = jwt.verify(token, "DEV@TINDER69");
-    const { _id } = decodedMessage;
+    // // Verify token
+    // const decodedMessage = jwt.verify(token, "DEV@TINDER69");
+    // const { _id } = decodedMessage;
 
     // Await the DB call
-    const user = await User.findById(_id);
+    // const user = await User.findById(_id);
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+    // if (!user) {
+    //   return res.status(404).json({ error: "User not found" });
+    // }
+
+    const user = req.user;
 
     res.json(user);
   } catch (err) {
