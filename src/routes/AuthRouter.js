@@ -1,6 +1,11 @@
 const express = require("express");
 const { validateSignUpData } = require("../utils/validation");
 const bcrypt = require("bcrypt");
+const User = require("../modal/user");
+const jwt = require("jsonwebtoken");
+
+
+
 
 
 const AuthRouter = express.Router();
@@ -38,5 +43,34 @@ AuthRouter.post("/logout", async(req, res)=>{
     res.send("Logged Out Sucessfully");
 });
 
+AuthRouter.post("/login", async(req, res) =>{
+  try{
+    const {email, password} = req.body;
+
+    const user = await User.findOne({email : email});
+    if(!user){
+      throw new Error("User is not Signed Up, Please Sign Up ");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if(isPasswordValid){
+
+      const token = jwt.sign({_id : user._id}, "DEV@TINDER69",{expiresIn : "1d"})
+
+
+
+      res.cookie("token", token)
+      res.send(user);
+
+    }else{
+      throw new Error("Login Error, Please try again or signUp first");
+    }
+    
+  }catch(err){
+    res.status(404).send(err.message)
+
+  }
+})
 
 module.exports = AuthRouter;
