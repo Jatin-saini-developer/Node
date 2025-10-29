@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const {userAuth} = require("./src/middleWares/userAuth")
 const requestRouter = require("./src/routes/Requests")
 const authRouter = require("./src/routes/AuthRouter");
+const UserRouter = require("./src/routes/user")
 const cors = require("cors");
 
 
@@ -26,6 +27,7 @@ app.use(
 
 app.use("/", authRouter);
 app.use("/", requestRouter);
+app.use("/",UserRouter)
 
 
 
